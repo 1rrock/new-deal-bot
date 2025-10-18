@@ -54,14 +54,14 @@ def main():
                 print(f"🆕 신규 코인 감지: {coin}")
                 logging.info(f"NEW_COIN_DETECTED: {coin}")
 
-                # KRW 잔고 조회 및 50% 계산
+                # KRW 잔고 조회 및 50% 계산 (수수료 0.139% 고려)
                 balances = upbit.get_balances()
                 krw_balance = 0
                 for balance in balances:
                     if balance['currency'] == 'KRW':
                         krw_balance = float(balance['balance'])
                         break
-                buy_amount = krw_balance * 0.5  # 50%
+                buy_amount = (krw_balance * 0.5) * (1 - 0.00139)  # 수수료 0.139% 차감 (지정가 매수)
                 if buy_amount < 5000:  # 최소 금액 체크 (업비트 최소 주문 금액)
                     print(f"❌ 잔고 부족: {krw_balance}원")
                     continue
@@ -85,8 +85,8 @@ def main():
                         executed_volume = float(order_info['executed_volume'])
                         avg_buy_price = float(order_info['avg_buy_price'])
 
-                        # 지정가 매도: 매수가의 2.4%
-                        sell_price = avg_buy_price * 0.024
+                        # 지정가 매도: 매수가의 +2.4%
+                        sell_price = avg_buy_price * (1 + 0.024)
                         if dry_run:
                             print(f"[DRY RUN] 매도 시뮬레이션: {coin} {executed_volume}개 @ {sell_price}원")
                             sell_result = {'uuid': 'dry-run-sell-uuid'}
